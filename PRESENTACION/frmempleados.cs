@@ -14,8 +14,8 @@ namespace PRESENTACION
 {
     public partial class frmempleados : Form
     {
-        private EmpleadosNegocio empleadosNegocio = new EmpleadosNegocio();
-        private EmpleadosNegocio empleadoNegocio = new EmpleadosNegocio();
+        private readonly EmpleadosNegocio empleadosNegocio = new EmpleadosNegocio();
+        private EmpleadosEntidad empleadoSeleccionado = null;
         private int? filaActiva = null;
 
         public frmempleados()
@@ -69,20 +69,13 @@ namespace PRESENTACION
         {
             try
             {
-                // 1. Asignar la lista de empleados obtenida de la Capa Negocio al DataSource
-                dgvEmpleados.DataSource = empleadoNegocio.MtdConsultarEmpleados();
+                var lista = empleadosNegocio.MtdConsultarEmpleados();
+                dgvEmpleados.DataSource = lista;
 
-                // 2. Limpiar selecciones previas para evitar confusiones visuales
                 dgvEmpleados.ClearSelection();
                 dgvEmpleados.CurrentCell = null;
-
-                // 3. Resetear la variable de control de fila activa
                 filaActiva = null;
-
-                // 4. Actualizar el contador de registros en la etiqueta inferior
                 MtdContarTotalRegistros();
-
-                // 5. Aplicar los nombres de columna personalizados
                 MtdRenombrarColumnas();
             }
             catch (Exception ex)
@@ -152,9 +145,9 @@ namespace PRESENTACION
                 EmpleadosEntidad empleado = new EmpleadosEntidad
                 {
                     Nombre = txtNombre.Text.Trim(),
-                    NumeroDpi = Convert.ToInt64(txtDpi.Text),
+                    NumeroDpi = long.Parse(txtDpi.Text),
                     Cargo = cboxCargo.Text,
-                    Salario = Convert.ToDecimal(txtsalario.Text),
+                    Salario = decimal.Parse(txtsalario.Text),
                     Genero = generoSeleccionado,
                     FechaNacimiento = dtpFechaNacimiento.Value,
                     FechaContratacion = dtpFechaContratacion.Value,

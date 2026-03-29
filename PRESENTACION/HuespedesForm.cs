@@ -211,7 +211,7 @@ namespace PRESENTACION
                 return false;
             }
 
-            if (!int.TryParse(txtTelefono.Text, out _))
+            if (!Int64.TryParse(txtTelefono.Text, out _))
             {
                 MessageBox.Show("Teléfono inválido", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtTelefono.Focus();
@@ -254,7 +254,8 @@ namespace PRESENTACION
                     NumeroIdentificacion = Convert.ToInt64(txtNumeroIdentificacion.Text),
                     FechaNacimiento = dtpFechaNacimiento.Value,
                     Genero = genero,
-                    Telefono = Convert.ToInt32(txtTelefono.Text),
+                    // Telefono puede exceder Int32, usar Int64
+                    Telefono = Convert.ToInt64(txtTelefono.Text),
                     Puntuacion = nudPuntuacion.Value,
                     Direccion = txtDireccion.Text.Trim(),
                     Estado = rdbActivo.Checked
