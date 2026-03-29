@@ -553,6 +553,112 @@
             Select * From tbl_huespedes;    
             
             
+
+
+
+
+
+
+-- =============================================
+-- Author: Elmer De La Cruz
+-- Create date: 15/03/2026
+-- Description:	usp para agregar empleados (Corregido)
+-- =============================================
+CREATE OR REPLACE PROCEDURE usp_AgregarEmpleados
+(
+    p_Nombre            IN VARCHAR2,
+    p_NumeroDpi         IN NUMBER, -- Usamos el tipo directo para evitar errores de declaración
+    p_Genero            IN CHAR,
+    p_Cargo             IN VARCHAR2,
+    p_Salario           IN NUMBER,
+    p_FechaNacimiento   IN DATE,
+    p_FechaContratacion IN DATE,
+    p_Estado            IN NUMBER,
+    p_UsuarioCreacion   IN VARCHAR2,
+    p_Resultado         OUT NUMBER,
+    p_Mensaje           OUT VARCHAR2
+)
+AS
+BEGIN
+    INSERT INTO tbl_Empleados (
+        Nombre, NumeroDpi, Genero, Cargo, Salario, 
+        FechaNacimiento, FechaContratacion, Estado, 
+        UsuarioCreacion, FechaCreacion
+    ) VALUES (
+        p_Nombre, p_NumeroDpi, p_Genero, p_Cargo, p_Salario, 
+        p_FechaNacimiento, p_FechaContratacion, p_Estado, 
+        p_UsuarioCreacion, SYSDATE
+    );
+
+    p_Resultado := 1;
+    p_Mensaje := 'Empleado agregado correctamente Oracle';
+
+EXCEPTION
+    WHEN OTHERS THEN
+        p_Resultado := 0;
+        p_Mensaje := 'Error en Oracle: ' || SQLERRM;
+END usp_AgregarEmpleados;
+/
+
+-- =============================================
+-- Description: usp para consultar empleados
+-- =============================================
+CREATE OR REPLACE PROCEDURE usp_ConsultarEmpleados
+(
+    p_cursor OUT SYS_REFCURSOR
+)
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT * FROM tbl_Empleados
+        ORDER BY CodigoEmpleado;
+END usp_ConsultarEmpleados;
+/
+
+-- =============================================
+-- Description: usp para buscar empleados por nombre
+-- =============================================
+CREATE OR REPLACE PROCEDURE usp_BuscarEmpleados
+(
+    p_Nombre VARCHAR2,
+    p_cursor OUT SYS_REFCURSOR
+)
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT * FROM tbl_Empleados
+        WHERE UPPER(Nombre) LIKE '%' || UPPER(p_Nombre) || '%'
+        ORDER BY CodigoEmpleado;
+END usp_BuscarEmpleados;
+/
+
+-- =============================================
+-- Description: usp para eliminar empleados
+-- =============================================
+CREATE OR REPLACE PROCEDURE usp_EliminarEmpleados
+(
+    p_CodigoEmpleado NUMBER,
+    p_Resultado OUT NUMBER,
+    p_Mensaje OUT VARCHAR2
+)
+AS
+BEGIN
+    DELETE FROM tbl_Empleados WHERE CodigoEmpleado = p_CodigoEmpleado;
+
+    IF SQL%ROWCOUNT = 0 THEN
+        p_Resultado := 0;
+        p_Mensaje := 'No se encontró el empleado';
+    ELSE
+        p_Resultado := 1;
+        p_Mensaje := 'Empleado eliminado correctamente';
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        p_Resultado := 0;
+        p_Mensaje := SQLERRM;
+END usp_EliminarEmpleados;
+/
             
             
             
