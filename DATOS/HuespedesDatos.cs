@@ -1,7 +1,7 @@
-﻿using MODELO;
-using Oracle.ManagedDataAccess.Client;
+﻿using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Data;
+using MODELO;
 
 namespace DATOS
 {
@@ -11,7 +11,7 @@ namespace DATOS
 
 
         /*  ---- CONSULTAR  ----  */
-        public DataTable MtdConsultarHuespedes()
+        public DataTable MtdConsultarHuespedes()            
         {
             DataTable dt = new DataTable();
 
@@ -62,7 +62,8 @@ namespace DATOS
                     cmd.Parameters.Add("p_NumeroIdentificacion", OracleDbType.Int64).Value = huesped.NumeroIdentificacion;
                     cmd.Parameters.Add("p_FechaNacimiento", OracleDbType.Date).Value = huesped.FechaNacimiento;
                     cmd.Parameters.Add("p_Genero", OracleDbType.Char).Value = huesped.Genero.ToString();
-                    cmd.Parameters.Add("p_Telefono", OracleDbType.Int32).Value = huesped.Telefono;
+                    // CORRECCIÓN: enviar Telefono como Int64
+                    cmd.Parameters.Add("p_Telefono", OracleDbType.Int64).Value = huesped.Telefono;
                     cmd.Parameters.Add("p_Direccion", OracleDbType.Varchar2).Value = huesped.Direccion;
                     cmd.Parameters.Add("p_Puntuacion", OracleDbType.Decimal).Value = huesped.Puntuacion;
                     // Oracle guarda Estado como NUMBER (1=activo, 0=inactivo)
@@ -112,7 +113,8 @@ namespace DATOS
                     cmd.Parameters.Add("p_NumeroIdentificacion", OracleDbType.Int64).Value = huesped.NumeroIdentificacion;
                     cmd.Parameters.Add("p_FechaNacimiento", OracleDbType.Date).Value = huesped.FechaNacimiento;
                     cmd.Parameters.Add("p_Genero", OracleDbType.Char).Value = huesped.Genero.ToString();
-                    cmd.Parameters.Add("p_Telefono", OracleDbType.Int32).Value = huesped.Telefono;
+                    // CORRECCIÓN: enviar Telefono como Int64
+                    cmd.Parameters.Add("p_Telefono", OracleDbType.Int64).Value = huesped.Telefono;
                     cmd.Parameters.Add("p_Direccion", OracleDbType.Varchar2).Value = huesped.Direccion;
                     cmd.Parameters.Add("p_Puntuacion", OracleDbType.Decimal).Value = huesped.Puntuacion;
                     cmd.Parameters.Add("p_Estado", OracleDbType.Int32).Value = huesped.Estado ? 1 : 0;

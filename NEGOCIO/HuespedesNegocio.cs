@@ -34,10 +34,11 @@ namespace NEGOCIO
                         NumeroIdentificacion = Convert.ToInt64(row["NumeroIdentificacion"]),
                         FechaNacimiento = Convert.ToDateTime(row["FechaNacimiento"]),
                         Genero = Convert.ToChar(row["Genero"]),
-                        Telefono = Convert.ToInt32(row["Telefono"]),
-                        Direccion =  row["Direccion"].ToString(),
+                        // CORRECCIÓN: leer Teléfono como Int64 y manejar DBNull
+                        Telefono = row["Telefono"] == DBNull.Value ? 0L : Convert.ToInt64(row["Telefono"]),
+                        Direccion = row["Direccion"].ToString(),
                         Puntuacion = Convert.ToDecimal(row["Puntuacion"]),
-                        Estado = Convert.ToInt32(row["Estado"])==1
+                        Estado = Convert.ToInt32(row["Estado"]) == 1
                     };
 
                     lista.Add(huesped);
@@ -58,7 +59,7 @@ namespace NEGOCIO
             if (huesped == null)
                 throw new Exception("No se recibieron datos");
 
-            if(huesped.CodigoHuesped != 0)
+            if (huesped.CodigoHuesped != 0)
                 throw new Exception("Codigo de huesped no necesita valor");
 
             if (string.IsNullOrWhiteSpace(huesped.Nombre))
@@ -129,7 +130,7 @@ namespace NEGOCIO
             }
             catch
             {
-                throw; 
+                throw;
             }
         }
 
@@ -175,8 +176,8 @@ namespace NEGOCIO
                         FechaNacimiento = Convert.ToDateTime(row["FechaNacimiento"]),
                         Genero = Convert.ToChar(row["Genero"]),
 
-                        // USAR Int64 para el Telefono (si lo cambiaste en la entidad)
-                        Telefono = Convert.ToInt64(row["Telefono"]),
+                        // ya estaba correcto aquí: Int64
+                        Telefono = row["Telefono"] == DBNull.Value ? 0L : Convert.ToInt64(row["Telefono"]),
 
                         Direccion = row["Direccion"].ToString(),
                         Puntuacion = Convert.ToDecimal(row["Puntuacion"]),
