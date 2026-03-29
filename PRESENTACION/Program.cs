@@ -16,7 +16,7 @@ namespace PRESENTACION
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new HuespedesForm());
+            Application.Run(new MDIParent1());
         }
     }
 }

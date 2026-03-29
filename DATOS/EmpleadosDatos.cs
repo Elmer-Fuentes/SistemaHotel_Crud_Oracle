@@ -23,7 +23,7 @@ namespace DATOS
                 using (OracleConnection conn = conexionDatos.MtdConexionBDD())
                 {
                     conn.Open();
-                    using (OracleCommand cmd = new OracleCommand("SYSTEM.usp_ConsultarEmpleados", conn))
+                using (OracleCommand cmd = new OracleCommand("usp_ConsultarEmpleados", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
@@ -55,19 +55,18 @@ namespace DATOS
             using (OracleConnection conn = conexionDatos.MtdConexionBDD())
             {
                 conn.Open();
-                using (OracleCommand cmd = new OracleCommand("SYSTEM.usp_AgregarEmpleados", conn))
+                using (OracleCommand cmd = new OracleCommand("usp_AgregarEmpleados", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     cmd.Parameters.Add("p_Nombre", OracleDbType.Varchar2).Value = empleado.Nombre;
-                    cmd.Parameters.Add("p_NumeroDpi", OracleDbType.Int64).Value = empleado.NumeroDpi;
-                    cmd.Parameters.Add("p_Genero", OracleDbType.Char).Value = empleado.Genero;
-                    cmd.Parameters.Add("p_Cargo", OracleDbType.Varchar2).Value = empleado.Cargo;
-                    cmd.Parameters.Add("p_Salario", OracleDbType.Decimal).Value = empleado.Salario;
-                    cmd.Parameters.Add("p_FechaNacimiento", OracleDbType.Date).Value = empleado.FechaNacimiento;
-                    cmd.Parameters.Add("p_FechaContratacion", OracleDbType.Date).Value = empleado.FechaContratacion;
-                    cmd.Parameters.Add("p_Estado", OracleDbType.Int32).Value = empleado.Estado ? 1 : 0;
-                    cmd.Parameters.Add("p_UsuarioCreacion", OracleDbType.Varchar2).Value = empleado.UsuarioCreacion;
+                    cmd.Parameters.Add("p_FechaNacimiento", OracleDbType.Date).Value = (object)empleado.FechaNacimiento ?? DBNull.Value;
+                    cmd.Parameters.Add("p_DPI", OracleDbType.Varchar2).Value = empleado.Dpi ?? string.Empty;
+                    cmd.Parameters.Add("p_NIT", OracleDbType.Varchar2).Value = empleado.Nit ?? string.Empty;
+                    cmd.Parameters.Add("p_FechaIngreso", OracleDbType.Date).Value = (object)empleado.FechaIngreso ?? DBNull.Value;
+                    cmd.Parameters.Add("p_Direccion", OracleDbType.Varchar2).Value = empleado.Direccion ?? string.Empty;
+                    cmd.Parameters.Add("p_Telefono", OracleDbType.Varchar2).Value = empleado.Telefono ?? string.Empty;
+                    cmd.Parameters.Add("p_Estado", OracleDbType.Varchar2).Value = empleado.Estado ?? string.Empty;
 
                     var pResultado = new OracleParameter("p_Resultado", OracleDbType.Int32) { Direction = ParameterDirection.Output };
                     var pMensaje = new OracleParameter("p_Mensaje", OracleDbType.Varchar2, 500) { Direction = ParameterDirection.Output };
@@ -113,20 +112,20 @@ namespace DATOS
         public string MtdEditarEmpleados(EmpleadosEntidad empleado)
         {
             using (OracleConnection conn = conexionDatos.MtdConexionBDD())
-            using (OracleCommand cmd = new OracleCommand("usp_EditarEmpleados", conn))
+                using (OracleCommand cmd = new OracleCommand("usp_EditarEmpleados", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 cmd.Parameters.Add("p_CodigoEmpleado", OracleDbType.Int32).Value = empleado.CodigoEmpleado;
                 cmd.Parameters.Add("p_Nombre", OracleDbType.Varchar2).Value = empleado.Nombre;
-                cmd.Parameters.Add("p_NumeroDpi", OracleDbType.Int64).Value = empleado.NumeroDpi;
-                cmd.Parameters.Add("p_Genero", OracleDbType.Char).Value = empleado.Genero.ToString();
-                cmd.Parameters.Add("p_Cargo", OracleDbType.Varchar2).Value = empleado.Cargo;
-                cmd.Parameters.Add("p_Salario", OracleDbType.Decimal).Value = empleado.Salario;
-                cmd.Parameters.Add("p_FechaNacimiento", OracleDbType.Date).Value = empleado.FechaNacimiento;
-                cmd.Parameters.Add("p_FechaContratacion", OracleDbType.Date).Value = empleado.FechaContratacion;
-                cmd.Parameters.Add("p_Estado", OracleDbType.Int32).Value = empleado.Estado ? 1 : 0;
-                cmd.Parameters.Add("p_UsuarioModificacion", OracleDbType.Varchar2).Value = empleado.UsuarioModificacion ?? "SYSTEM";
+                cmd.Parameters.Add("p_FechaNacimiento", OracleDbType.Date).Value = (object)empleado.FechaNacimiento ?? DBNull.Value;
+                cmd.Parameters.Add("p_DPI", OracleDbType.Varchar2).Value = empleado.Dpi ?? string.Empty;
+                cmd.Parameters.Add("p_NIT", OracleDbType.Varchar2).Value = empleado.Nit ?? string.Empty;
+                cmd.Parameters.Add("p_FechaIngreso", OracleDbType.Date).Value = (object)empleado.FechaIngreso ?? DBNull.Value;
+                cmd.Parameters.Add("p_Direccion", OracleDbType.Varchar2).Value = empleado.Direccion ?? string.Empty;
+                cmd.Parameters.Add("p_Telefono", OracleDbType.Varchar2).Value = empleado.Telefono ?? string.Empty;
+                cmd.Parameters.Add("p_Estado", OracleDbType.Varchar2).Value = empleado.Estado ?? string.Empty;
+                // no usamos usuario modificacion in DB schema
 
                 var pResultado = new OracleParameter("p_Resultado", OracleDbType.Int32) { Direction = ParameterDirection.Output };
                 var pMensaje = new OracleParameter("p_Mensaje", OracleDbType.Varchar2, 500) { Direction = ParameterDirection.Output };

@@ -14,22 +14,46 @@ namespace NEGOCIO
         {
             DataTable dt = datos.MtdConsultarEmpleados();
             List<EmpleadosEntidad> lista = new List<EmpleadosEntidad>();
+
+            // Helper to find column name case-insensitively
+            string FindColumn(DataRow row, string name)
+            {
+                if (row.Table == null) return null;
+                foreach (DataColumn col in row.Table.Columns)
+                {
+                    if (string.Equals(col.ColumnName, name, StringComparison.OrdinalIgnoreCase))
+                        return col.ColumnName;
+                }
+                return null;
+            }
+
             foreach (DataRow row in dt.Rows)
             {
+                string cCodigo = FindColumn(row, "CodigoEmpleado");
+                string cNombre = FindColumn(row, "Nombre");
+                string cDpi = FindColumn(row, "Dpi");
+                string cNit = FindColumn(row, "Nit");
+                string cFechaN = FindColumn(row, "Fechanacimiento");
+                string cFechaIngreso = FindColumn(row, "Fechaingreso");
+                string cDireccion = FindColumn(row, "Direccion");
+                string cTelefono = FindColumn(row, "Telefono");
+                string cEstado = FindColumn(row, "Estado");
+
                 var e = new EmpleadosEntidad
                 {
-                    CodigoEmpleado = row["CodigoEmpleado"] == DBNull.Value ? 0 : Convert.ToInt32(row["CodigoEmpleado"]),
-                    Nombre = row["Nombre"] == DBNull.Value ? string.Empty : row["Nombre"].ToString(),
-                    NumeroDpi = row["NumeroDpi"] == DBNull.Value ? 0L : Convert.ToInt64(row["NumeroDpi"]),
-                    Genero = row["Genero"] == DBNull.Value ? 'O' : Convert.ToChar(row["Genero"].ToString()[0]),
-                    Cargo = row["Cargo"] == DBNull.Value ? string.Empty : row["Cargo"].ToString(),
-                    Salario = row["Salario"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Salario"]),
-                    FechaNacimiento = row["FechaNacimiento"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(row["FechaNacimiento"]),
-                    FechaContratacion = row["FechaContratacion"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(row["FechaContratacion"]),
-                    Estado = row["Estado"] == DBNull.Value ? false : Convert.ToInt32(row["Estado"]) == 1
+                    CodigoEmpleado = cCodigo == null || row[cCodigo] == DBNull.Value ? 0 : Convert.ToInt32(row[cCodigo]),
+                    Nombre = cNombre == null || row[cNombre] == DBNull.Value ? string.Empty : row[cNombre].ToString(),
+                    Dpi = cDpi == null || row[cDpi] == DBNull.Value ? string.Empty : row[cDpi].ToString(),
+                    Nit = cNit == null || row[cNit] == DBNull.Value ? string.Empty : row[cNit].ToString(),
+                    FechaNacimiento = cFechaN == null || row[cFechaN] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(row[cFechaN]),
+                    FechaIngreso = cFechaIngreso == null || row[cFechaIngreso] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(row[cFechaIngreso]),
+                    Direccion = cDireccion == null || row[cDireccion] == DBNull.Value ? string.Empty : row[cDireccion].ToString(),
+                    Telefono = cTelefono == null || row[cTelefono] == DBNull.Value ? string.Empty : row[cTelefono].ToString(),
+                    Estado = cEstado == null || row[cEstado] == DBNull.Value ? string.Empty : row[cEstado].ToString()
                 };
                 lista.Add(e);
             }
+
             return lista;
         }
 
@@ -37,22 +61,46 @@ namespace NEGOCIO
         {
             DataTable dt = datos.MtdBuscarEmpleados(nombre);
             List<EmpleadosEntidad> lista = new List<EmpleadosEntidad>();
+
+            // Reuse same case-insensitive column lookup approach
+            string FindColumn(DataRow row, string name)
+            {
+                if (row.Table == null) return null;
+                foreach (DataColumn col in row.Table.Columns)
+                {
+                    if (string.Equals(col.ColumnName, name, StringComparison.OrdinalIgnoreCase))
+                        return col.ColumnName;
+                }
+                return null;
+            }
+
             foreach (DataRow row in dt.Rows)
             {
+                string cCodigo = FindColumn(row, "CodigoEmpleado");
+                string cNombre = FindColumn(row, "Nombre");
+                string cDpi = FindColumn(row, "Dpi");
+                string cNit = FindColumn(row, "Nit");
+                string cFechaN = FindColumn(row, "Fechanacimiento");
+                string cFechaIngreso = FindColumn(row, "Fechaingreso");
+                string cDireccion = FindColumn(row, "Direccion");
+                string cTelefono = FindColumn(row, "Telefono");
+                string cEstado = FindColumn(row, "Estado");
+
                 var e = new EmpleadosEntidad
                 {
-                    CodigoEmpleado = row["CodigoEmpleado"] == DBNull.Value ? 0 : Convert.ToInt32(row["CodigoEmpleado"]),
-                    Nombre = row["Nombre"] == DBNull.Value ? string.Empty : row["Nombre"].ToString(),
-                    NumeroDpi = row["NumeroDpi"] == DBNull.Value ? 0L : Convert.ToInt64(row["NumeroDpi"]),
-                    Genero = row["Genero"] == DBNull.Value ? 'O' : Convert.ToChar(row["Genero"].ToString()[0]),
-                    Cargo = row["Cargo"] == DBNull.Value ? string.Empty : row["Cargo"].ToString(),
-                    Salario = row["Salario"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Salario"]),
-                    FechaNacimiento = row["FechaNacimiento"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(row["FechaNacimiento"]),
-                    FechaContratacion = row["FechaContratacion"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(row["FechaContratacion"]),
-                    Estado = row["Estado"] == DBNull.Value ? false : Convert.ToInt32(row["Estado"]) == 1
+                    CodigoEmpleado = cCodigo == null || row[cCodigo] == DBNull.Value ? 0 : Convert.ToInt32(row[cCodigo]),
+                    Nombre = cNombre == null || row[cNombre] == DBNull.Value ? string.Empty : row[cNombre].ToString(),
+                    Dpi = cDpi == null || row[cDpi] == DBNull.Value ? string.Empty : row[cDpi].ToString(),
+                    Nit = cNit == null || row[cNit] == DBNull.Value ? string.Empty : row[cNit].ToString(),
+                    FechaNacimiento = cFechaN == null || row[cFechaN] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(row[cFechaN]),
+                    FechaIngreso = cFechaIngreso == null || row[cFechaIngreso] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(row[cFechaIngreso]),
+                    Direccion = cDireccion == null || row[cDireccion] == DBNull.Value ? string.Empty : row[cDireccion].ToString(),
+                    Telefono = cTelefono == null || row[cTelefono] == DBNull.Value ? string.Empty : row[cTelefono].ToString(),
+                    Estado = cEstado == null || row[cEstado] == DBNull.Value ? string.Empty : row[cEstado].ToString()
                 };
                 lista.Add(e);
             }
+
             return lista;
         }
 
@@ -60,8 +108,7 @@ namespace NEGOCIO
         {
             if (empleado == null) throw new ArgumentNullException(nameof(empleado));
             if (string.IsNullOrWhiteSpace(empleado.Nombre)) throw new ArgumentException("Nombre requerido");
-            if (empleado.NumeroDpi <= 0) throw new ArgumentException("DPI requerido");
-            if (empleado.Salario <= 0) throw new ArgumentException("Salario inválido");
+            if (string.IsNullOrWhiteSpace(empleado.Dpi)) throw new ArgumentException("DPI requerido");
 
             return datos.MtdAgregarEmpleados(empleado);
         }

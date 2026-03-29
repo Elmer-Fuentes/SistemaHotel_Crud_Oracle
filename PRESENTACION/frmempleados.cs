@@ -17,6 +17,7 @@ namespace PRESENTACION
         private readonly EmpleadosNegocio empleadosNegocio = new EmpleadosNegocio();
         private EmpleadosEntidad empleadoSeleccionado = null;
         private int? filaActiva = null;
+        private bool isEditing = false;
 
         public frmempleados()
         {
@@ -33,9 +34,8 @@ namespace PRESENTACION
         private void MtdRenombrarColumnas()
         {
             CambiarTitulo("CodigoEmpleado", "ID");
-            CambiarTitulo("NumeroDpi", "DPI (Identificación)");
-            CambiarTitulo("FechaContratacion", "F. Contratación");
-            CambiarTitulo("Salario", "Sueldo Base");
+            CambiarTitulo("Dpi", "DPI (Identificación)");
+            CambiarTitulo("FechaIngreso", "F. Ingreso");
         }
 
         private void CambiarTitulo(string nombreColumna, string titulo)
@@ -139,25 +139,40 @@ namespace PRESENTACION
 
             try
             {
-                char generoSeleccionado = cboxGenero.Text == "Masculino" ? 'M' :
-                                         cboxGenero.Text == "Femenino" ? 'F' : 'O';
-
+                // Map form fields to EmpleadosEntidad (DB stores DPI and Telefono as strings)
                 EmpleadosEntidad empleado = new EmpleadosEntidad
                 {
                     Nombre = txtNombre.Text.Trim(),
-                    NumeroDpi = long.Parse(txtDpi.Text),
-                    Cargo = cboxCargo.Text,
-                    Salario = decimal.Parse(txtsalario.Text),
-                    Genero = generoSeleccionado,
+                    Dpi = txtDpi.Text.Trim(),
+                    Nit = string.Empty,
                     FechaNacimiento = dtpFechaNacimiento.Value,
-                    FechaContratacion = dtpFechaContratacion.Value,
-                    Estado = rdbActivo.Checked,
-                    UsuarioCreacion = "SYSTEM" // O el usuario logueado
+                    FechaIngreso = dtpFechaContratacion.Value,
+                    Direccion = string.Empty,
+                    Telefono = string.Empty,
+                    Estado = rdbActivo.Checked ? "1" : "0",
+                    UsuarioCreacion = "SYSTEM"
                 };
 
-                string respuesta = empleadosNegocio.MtdAgregarEmpleados(empleado);
+                string respuesta;
+                if (isEditing)
+                {
+                    // Edit existing
+                    if (!int.TryParse(txtCodigo.Text, out int codigo))
+                    {
+                        MessageBox.Show("Código inválido", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    empleado.CodigoEmpleado = codigo;
+                    respuesta = empleadosNegocio.MtdEditarEmpleados(empleado);
+                }
+                else
+                {
+                    respuesta = empleadosNegocio.MtdAgregarEmpleados(empleado);
+                }
                 MessageBox.Show(respuesta, "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+                // reset edit mode and refresh
+                isEditing = false;
                 MtdLimpiarYRefrescar();
             }
             catch (Exception ex)
@@ -214,27 +229,74 @@ namespace PRESENTACION
         private bool MtdValidarDatos()
         {
             if (string.IsNullOrWhiteSpace(txtNombre.Text)) { txtNombre.Focus(); return false; }
-            if (!long.TryParse(txtDpi.Text, out _)) { txtDpi.Focus(); return false; }
-            if (!decimal.TryParse(txtsalario.Text, out _)) { txtsalario.Focus(); return false; }
-            if (cboxCargo.SelectedIndex == -1) return false;
+            if (string.IsNullOrWhiteSpace(txtDpi.Text)) { txtDpi.Focus(); return false; }
+            // Telefono is optional but if present ensure it's numeric-ish
+            // if (!string.IsNullOrWhiteSpace(txtTelefono.Text) && !long.TryParse(txtTelefono.Text, out _)) { txtTelefono.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(cboxCargo.Text)) return false;
 
             return true;
         }
 
         private void dgvEmpleados_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0 || dgvEmpleados.Columns[e.ColumnIndex].Name != "Seleccionar") return;
+            if (e.RowIndex < 0) return;
 
-            dgvEmpleados.EndEdit();
-            bool estaSeleccionado = Convert.ToBoolean(dgvEmpleados.Rows[e.RowIndex].Cells["Seleccionar"].Value);
-
-            if (estaSeleccionado)
+            // If the UI is in selection mode (checkbox visible), only toggle when clicking the checkbox column
+            try
             {
-                MtdActivarFila(e.RowIndex);
+                if (chkSeleccionar.Checked)
+                {
+                    // If clicked the checkbox column, toggle it
+                    if (dgvEmpleados.Columns[e.ColumnIndex].Name == "Seleccionar")
+                    {
+                        dgvEmpleados.EndEdit();
+                        object val = dgvEmpleados.Rows[e.RowIndex].Cells["Seleccionar"].Value;
+                        bool estaSeleccionado = false;
+                        if (val == null || val == DBNull.Value)
+                            estaSeleccionado = false;
+                        else
+                        {
+                            // Try parse common types
+                            if (val is bool) estaSeleccionado = (bool)val;
+                            else bool.TryParse(val.ToString(), out estaSeleccionado);
+                        }
+
+                        // toggle
+                        dgvEmpleados.Rows[e.RowIndex].Cells["Seleccionar"].Value = !estaSeleccionado;
+
+                        if (!estaSeleccionado)
+                            MtdActivarFila(e.RowIndex);
+                        else
+                            MtdDesactivarFila();
+                    }
+                }
+                else
+                {
+                    // Not in checkbox selection mode: clicking any cell selects the row and loads data
+                    MtdActivarFila(e.RowIndex);
+                }
             }
-            else
+            catch (Exception ex)
             {
+                MessageBox.Show("Error al seleccionar fila: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void chkSeleccionar_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dgvEmpleados.Columns.Contains("Seleccionar"))
+                {
+                    dgvEmpleados.Columns["Seleccionar"].ReadOnly = !chkSeleccionar.Checked;
+                }
+                btnImprimir.Enabled = chkSeleccionar.Checked;
+                // Clear any existing selection
                 MtdDesactivarFila();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cambiar modo seleccionar: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -272,10 +334,12 @@ namespace PRESENTACION
 
             txtCodigo.Text = emp.CodigoEmpleado.ToString();
             txtNombre.Text = emp.Nombre;
-            txtDpi.Text = emp.NumeroDpi.ToString();
-            txtsalario.Text = emp.Salario.ToString();
-            cboxCargo.Text = emp.Cargo;
-            dtpFechaNacimiento.Value = emp.FechaNacimiento;
+            txtDpi.Text = emp.Dpi;
+            // txtsalario UI exists but DB doesn't have salary; leave blank or show N/A
+            txtsalario.Text = string.Empty;
+            // cboxCargo not persisted in DB; leave selection alone
+            cboxCargo.Text = cboxCargo.Text;
+            dtpFechaNacimiento.Value = emp.FechaNacimiento ?? DateTime.Today;
 
             MtdEstadoFilaSeleccionada(true);
         }
@@ -291,5 +355,55 @@ namespace PRESENTACION
             // 3. Poner el foco en el primer campo de entrada (Nombre)
             txtNombre.Focus();
         }
+
+        private void btnEditar_Click_1(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtCodigo.Text))
+            {
+                MessageBox.Show("Seleccione un empleado para editar", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Enter edit mode
+            isEditing = true;
+            MtdEstadoFilaSeleccionada(true);
+            btnGuardar.Enabled = true;
+            btnEditar.Enabled = false;
+            btnEliminar.Enabled = false;
+            btnNuevo.Enabled = false;
+            txtNombre.Focus();
+        }
+
+        private void btnEliminar_Click_1(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtCodigo.Text))
+            {
+                MessageBox.Show("Seleccione un empleado para eliminar", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show("¿Desea eliminar el empleado seleccionado?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                try
+                {
+                    int codigo = 0;
+                    if (!int.TryParse(txtCodigo.Text, out codigo))
+                    {
+                        MessageBox.Show("Código inválido", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    string resp = empleadosNegocio.MtdEliminarEmpleados(codigo);
+                    MessageBox.Show(resp, "Eliminar", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MtdLimpiarYRefrescar();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+
     }
 }
